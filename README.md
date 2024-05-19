@@ -1,4 +1,8 @@
-
+Hướng dẫn sử dụng frontend:
+- Sau khi clone project, cd vào Frontend
+- Chạy lệnh để cài các dependencies: npm i
+- Chạy lệnh để start server: npm start
+- Mở http://localhost:3000 trên 1 trình duyệt bất kì
 Hướng dẫn sử dụng backend:
 Đầu tiên sau khi tải về: ta dùng phần mềm Intelij IDEA để mở lên:
 Ta sẽ thấy bố cục chung của project như này:
