@@ -22,7 +22,23 @@ function Login() {
     }
 
     try {
-      const repons = await axios.get(`http://localhost:8080/api/Student/getStudent?mssv=${tk}&matKhau=${mk}`)
+      // const token = await axios.post('http://localhost:8080/api/Auth_Service/auth/token', {
+      //   // header: {
+      //   //   'Content-Type': 'application/json'
+      //   // },
+      //   mssv: tk,
+      //   matKhau: mk
+      // })    
+      // console.log("token", token.data);
+
+      // const repons = await axios.get(`http://localhost:8080/api/Student_Service/getStudent?mssv=${tk}&matKhau=${mk}`)
+      // console.log("đăngn ahsdpasd", repons.data);
+      // setUser(repons.data)
+      // localStorage.removeItem('token');
+      // localStorage.setItem('token', JSON.stringify(repons.data));
+      // navigate(`${path.ROOT}`);
+      // const repons = await axios.get(`http://localhost:8080/api/Student_Service/getStudent?mssv=${tk}&matKhau=${mk}`)
+      const repons = await axios.get(`http://localhost:8080/api/Student_Service/getStudent?mssv=${tk}&matKhau=${mk}`)
       console.log("đăngn ahsdpasd", repons.data);
       setUser(repons.data)
       localStorage.removeItem('token');
@@ -34,9 +50,7 @@ function Login() {
       setError("Sai tài khoản hoặc mật khẩu")
 
     }
-    // localStorage.removeItem('token');
-    // localStorage.setItem('token', 'cokkkk');
-    // navigate(`${path.ROOT}`);
+    
   }
   // hàm random mã bảo vệ
   
@@ -120,7 +134,7 @@ function Login() {
                         style={{ width: '30px', height: '30px', cursor: 'pointer', marginRight: '54px' }}
                       />
                       <div style={{ width: '40px', height: '40px', color: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <h4 className="capchar-style" style={{background:backgroupSVG, color: capcharColor,textDecorationLine: 'line-through', margin: 0 }}>
+                        <h4 className="capchar-style" style={{background:backgroupSVG, color: capcharColor, margin: 0 }}>
                           {capchar}
                         </h4>
                       </div>

@@ -17,7 +17,6 @@ import batBuoc from '../../assets/images/ico-select-min.png'
 import { useEffect, useState } from "react";
 import { useUser } from "../../contexts/UserContext.js";
 import axios from "axios";
-import { Modal } from "react-bootstrap";
 function Home() {
   const { user } = useUser();
   //===============================================================
@@ -25,10 +24,8 @@ function Home() {
   // biến lưu danh sách học kì
 
 
-  useEffect(() => {
-    getMonHocCTK();
-    generateAcademicTerms(user.namBatDauHoc);
-  }, []);
+
+
   //===============================================================================================================================================================================================
   // biến và các hàm sử lý bảng môn học
   const [academicTerms, setAcademicTerms] = useState([]);
@@ -65,11 +62,12 @@ function Home() {
     }
     setAcademicTerms(terms);
     setSelectedTerm(defaultTerm);
+   
   }
 
   const [dataMH, setDataMH] = useState([]);
   async function getMonHocCTK() {
-    const respons = await axios.get(`http://localhost:8080/api/Student/getMonHocCTK?mssv=${user.mssv}`);
+    const respons = await axios.get(`http://localhost:8080/api/DKHP_Service/getMonHocCTK?mssv=${user.mssv}`);
     setDataMH(respons.data);
   }
   // hàm chọn học kì
@@ -89,6 +87,7 @@ function Home() {
     setSelectedRowMonHoc(-1);
     setSelectedRowLopHocPhan(-1);
     setLopHocTheoMonHocTheoHocKy([])
+    setLopHocPhanDaDangKy([])
 
   };
   //=================================================================================================================================================================================================================================================================================================
@@ -107,7 +106,7 @@ function Home() {
     setNhomTH([]);
     // Gọi API lấy môn học theo học kỳ
     try {
-      const repon = await axios.get(`http://localhost:8080/api/Student/getLopHocPhan?maMonHoc=${item.monHoc.maMonHoc}&kiHoc=${selectedTerm}`)
+      const repon = await axios.get(`http://localhost:8080/api/DKHP_Service/getLopHocPhan?maMonHoc=${item.monHoc.maMonHoc}&kiHoc=${selectedTerm}`)
       setLopHocTheoMonHocTheoHocKy(repon.data);
     } catch (error) {
       console.log(error);
@@ -131,7 +130,7 @@ function Home() {
     setSelectedTH("");
     // Gọi API lấy môn học theo học kỳ
     try {
-      const repon = await axios.get(`http://localhost:8080/api/Student/getGiangVienLopHP?maLopHocPhan=${item.maLopHocPhan}`)
+      const repon = await axios.get(`http://localhost:8080/api/DKHP_Service/getGiangVienLopHP?maLopHocPhan=${item.maLopHocPhan}`)
       console.log("objectrepon", repon.data);
       setChiTietLopHocPhan(repon.data);
       if (repon.data?.loaiLichHoc === 'TH') {
@@ -185,43 +184,78 @@ function Home() {
   function handleChonNhomTH(e) {
     setSelectedTH(e.target.value);
   }
-// dăng ký môn học
-async function DangKiMonHoc() {
- if (chiTietLopHocPhan?.loaiLichHoc === 'TH'){
-  if (selectedTH === "") {
-    alert("Chọn nhóm thực hành");
-    return;
+  // dăng ký môn học
+  async function DangKiMonHoc() {
+    if (chiTietLopHocPhan?.loaiLichHoc === 'TH') {
+      console.log("aaa");
+      if (selectedTH === "") {
+        alert("Chọn nhóm thực hành");
+        return;
 
- }
- else{
-   // Khai báo dữ liệu cần gửi lên server
-   const data = {
-    sinhVien: {
-      mssv: user.mssv, 
-    },
-    lopHocPhan: {
-      maLopHocPhan: chiTietLopHocPhan.maLopHocPhan
-    },
-    ngayDangKy:  new Date().toISOString(),  // thời gian hiện tại 
-    trangThaiHocPhi: 0, 
-    nhomTH: selectedTH==""?0:selectedTH
-  };
+      }
+    }
+    console.log("oaabject", chiTietLopHocPhan?.loaiLichHoc);
 
-  try {
-    const response = await axios.post(`http://localhost:8080/api/Student/addBangDiem`, data);
-    console.log("Đăng ký môn học thành công", response.data);
-    getMonHocCTK();
-    setChiTietLopHocPhan()
-    setSelectedRowMonHoc(-1);
-    setSelectedRowLopHocPhan(-1);
-    setNhomTH([]);
-    setSelectedTH("");
-    setLopHocTheoMonHocTheoHocKy([])
-  } catch (error) {
-    console.log("Lỗi đăng ký môn học", error);
+    // Khai báo dữ liệu cần gửi lên server
+    const data = {
+      sinhVien: {
+        mssv: user.mssv,
+      },
+      lopHocPhan: {
+        maLopHocPhan: chiTietLopHocPhan.maLopHocPhan
+      },
+      ngayDangKy: new Date().toISOString(),  // thời gian hiện tại 
+      trangThaiHocPhi: 0,
+      nhomTH: selectedTH == "" ? 0 : selectedTH
+    };
+
+    try {
+      const response = await axios.post(`http://localhost:8080/api/DKHP_Service/addBangDiem`, data,{
+        headers: {
+          'Content-Type': 'application/json',
+          'Referrer-Policy': 'no-referrer'  // Không gửi referrer header
+        },
+      });
+      console.log("Đăng ký môn học thành công", response.data);
+      getMonHocCTK();
+      getLopHocPhanDaDangKy()
+      setChiTietLopHocPhan()
+      setSelectedRowMonHoc(-1);
+      setSelectedRowLopHocPhan(-1);
+      setNhomTH([]);
+      setSelectedTH("");
+      setLopHocTheoMonHocTheoHocKy([])
+    } catch (error) {
+      console.log("Lỗi đăng ký môn học", error);
+    }
+
+
   }
+
+  useEffect(() => {(async () => {
+    await getMonHocCTK();
+     generateAcademicTerms(user.namBatDauHoc);
+   })();
+   }, []);
+   useEffect(() => {
+     if (selectedTerm) {
+       getLopHocPhanDaDangKy();
+     }
+   }, [selectedTerm]);
+   // biến lưu danh sách lớp học phần đã đăng ký
+    const [lopHocPhanDaDangKy, setLopHocPhanDaDangKy] = useState([]);
+ // get lớp học phần đã đăng kí trong kì này
+ async function getLopHocPhanDaDangKy() {
+   try{
+     console.log("hoc kì",selectedTerm);
+     const respons = await axios.get(`http://localhost:8080/api/DKHP_Service/getLHPDaDK?mssv=${user.mssv}&kiHoc=${selectedTerm}`);
+      setLopHocPhanDaDangKy(respons.data);
+   console.log("Học phần đã dăng kí", respons.data);
+   }
+   catch(error){
+     console.log("Lỗi get Lớp học phần đã đăng kí",error);
+   }
  }
-}}
   return (
     <div>
       <Banner />
@@ -437,7 +471,7 @@ async function DangKiMonHoc() {
                             marginRight: "20px",
                             minWidth: "150px",
                           }} value={selectedTH} onChange={handleChonNhomTH}>
-                             <option value="">Chọn nhóm thực hành</option>
+                          <option value="">Chọn nhóm thực hành</option>
                           {nhomTH.map((term, index) => (
                             <option key={index} value={term}>
                               {term}
@@ -491,7 +525,7 @@ async function DangKiMonHoc() {
                         {
                           chiTietLopHocPhan?.maLopHocPhan != 0 && chiTietLopHocPhan?.loaiLichHoc === 'TH' &&
                           chiTietLopHocPhan.lichHocTHList.map((item, index) => (
-                            <tr className={`${selectedTH == (index+1) ? 'selected-row-blue' : ''}`} key={index}>
+                            <tr className={`${selectedTH == (index + 1) ? 'selected-row-blue' : ''}`} key={index}>
                               <td>{index + 2}</td>
                               <td>{getLichHoc(item.lichHoc[0])}</td>
                               <td>{item.tenNhomLichHocTH}</td>
@@ -512,7 +546,7 @@ async function DangKiMonHoc() {
                 </div>
                 <div style={{ textAlign: "center" }} id="dkhpbtn">
                   <a
-                  onClick={DangKiMonHoc}
+                    onClick={DangKiMonHoc}
                     id="dkMonHoc"
                     type="submit"
                     name
@@ -554,14 +588,33 @@ async function DangKiMonHoc() {
                           <th>Số TC</th>
                           <th style={{ padding: 0 }}>Nhóm TH</th>
                           <th>Học phí</th>
-                          <th>Hạn nộp</th>
-                          <th>Thu</th>
+                         
                           <th>Trang thái ĐK</th>
                           <th>Ngày ĐK</th>
                           <th>Trang Thái LHP</th>
                         </tr>
                       </thead>
-                      <tbody />
+                      <tbody>
+                        {lopHocPhanDaDangKy && lopHocPhanDaDangKy.map((item, index) => (
+                          <tr key={index}>
+                            <td>
+                            
+                            </td>
+                            <td>{index + 1}</td>
+                            <td>{item.maLopHocPhan}</td>
+                            <td className="alignleftcol">{item.monHoc.tenMonHoc}</td>
+                            <td className="alignleftcol">{item.tenLopHocPhan}</td>
+                            <td>{TongTCMH(item.soTinhChiLT,item.soTinhChiTH)}</td>
+                            <td>{item.nhomTH=='0'?null:item.nhomTH}</td>
+                            <td></td>
+                            <td></td>
+                           
+                            <td>{item.ngayDangKy.slice(0,10)}</td>
+                            <td>{item.trangThaiLop}</td>
+                          </tr>
+                      ))  
+                        }
+                      </tbody>
                     </table>
                   </div>
                 </div>

@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("")
+@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class SinhVienController {
 

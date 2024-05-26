@@ -41,7 +41,7 @@ public class DataSampleConfig {
         };
     }
 
-    //            @Bean
+//                @Bean
     CommandLineRunner initDatabase() {
         return args -> {
             // insert Khoa
